@@ -8,8 +8,8 @@ Vagrant.configure("2") do |config|
      vb.memory = "1024"
   end
   config.vm.provision "shell", inline: <<-SHELL
-  which ansible >/dev/null || yum -y install ansible
-  which git >/dev/null || yum -y install git
+  which ansible >/dev/null 2>&1 || yum -y install ansible
+  which git >/dev/null 2>&1 || yum -y install git
   yum install -y python-pip
   pip install --upgrade pip
   yum install -y python-kerberos
@@ -40,7 +40,8 @@ ansible-playbook install.yml -i inventory
 EOF
 
 git clone https://github.com/kmonticolo/ansible.windows
-
+mv ansible.windows/* .
+chown -R vagrant:vagrant /home/vagrant
 #ansible -m win_ping all -i inventory
 SHELL
 end
