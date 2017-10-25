@@ -1,0 +1,21 @@
+---
+- hosts: all
+  tasks:
+  - name: copy package
+    win_copy:
+      src: /vagrant/IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
+      #dest: c:\temp\
+      dest: C:\Users\Administrator\AppData\Local\Temp
+  - name: Unzip package
+    win_unzip:
+      #src: C:\temp\IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
+      src: C:\Users\Administrator\AppData\Local\Temp\IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
+      dest: C:\Users\Administrator\AppData\Local\Temp\unzip
+      creates: C:\Users\Administrator\AppData\Local\Temp\unzip
+
+  - name: Install package
+    win_package:
+      path: C:\Users\Administrator\AppData\Local\Temp\unzip\xagtSetup_25.12.1_universal.msi
+      product_id: '{37CB321B-20FA-4E1C-A6E1-26CB5690B573}'
+      state: present
+      
