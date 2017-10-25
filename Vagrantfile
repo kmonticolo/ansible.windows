@@ -32,10 +32,12 @@ ansible_winrm_server_cert_validation: ignore
 EOF
 
 cat >/etc/motd<<EOF
-# update inventory file
-# to test 
+
+# 1. Put zip packages in directory with Vagrantfile
+# 2. update inventory file
+# 3. to test 
 ansible -m win_ping all -i inventory
-# to run playbook
+# 4. to run playbook
 ansible-playbook install.yml -i inventory 
 EOF
 
