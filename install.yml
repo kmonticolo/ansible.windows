@@ -9,6 +9,7 @@
     win_copy:
       src: /vagrant/{{ package }}
       dest: "{{ destdir }}\\"
+      force: no
   - name: Unzip package
     win_unzip:
       src: "{{ destdir }}\\{{ package }}"
