@@ -24,7 +24,10 @@
       register: pkg
   - name: Remove zip
     win_file:
-      path: "{{ destdir }}\\{{ package }}"
+      path: "{{ item }}"
       state: absent
+      with_items: 
+        - "{{ destdir }}\\{{ package }}"
+        - "{{ destdir }}\\unzip\\xagtSetup_25.12.1_universal.msi"
+        - "{{ destdir }}\\unzip"
       when: pkg|succeeded
-
