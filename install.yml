@@ -5,6 +5,10 @@
   - package: IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
   - destdir: C:\Users\Administrator\AppData\Local\Temp
   tasks:
+  - name: create temp
+    win_file:
+      path: '{{ destdir }}'
+      state: directory
   - name: copy package
     win_copy:
       src: /vagrant/{{ package }}
