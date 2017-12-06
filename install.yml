@@ -30,6 +30,7 @@
     win_file:
       path: "{{ item }}"
       state: absent
+      ignore_errors: yes
       with_items: 
         - "{{ destdir }}\\{{ package }}"
         - "{{ destdir }}\\unzip\\xagtSetup_25.12.1_universal.msi"
