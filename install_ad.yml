@@ -1,0 +1,72 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+  - package: IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
+  tasks:
+  - name: get package from Artifactory
+    get_url:
+      url: "https://arm.lmera.repo.se/artifactory/proj-ops-001-fireeye-generic-local/{{ package }}"
+      dest: "/tmp/{{ package }}"
+    #delegate_to: localhost
+    
+- hosts: all
+  gather_facts: false
+  vars:
+  - ansible_port: 5986
+  - ansible_connection: winrm
+  - ansible_winrm_transport: ntlm
+  - ansible_winrm_server_cert_validation: ignore
+  - ansible_winrm_scheme: https
+  - ansible_winrm_operation_timeout_sec: 60
+  - ansible_winrm_read_timeout_sec: 70
+
+  - package: IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
+  #- package: IMAGE_HX_AGENT_WIN_25.12.1_APAC.zip
+  #- package: IMAGE_HX_AGENT_WIN_25.12.1_AMCS.zip
+  # destination directory on remote server
+  - destdir: C:\Users\Administrator\AppData\Local\Temp
+  - msipath: "{{ destdir }}\\unzip\\xagtSetup_25.12.1_universal.msi"
+  tasks:
+  - name: copy package
+    win_copy:
+      src: /tmp/{{ package }}
+      dest: '{{ destdir }}\{{ package }}'
+      force: no
+  - name: Unzip package
+    win_unzip:
+      src: '{{ destdir }}\{{ package }}'
+      dest: '{{ destdir }}\unzip'
+      # takes more time, but ensure that correct json file is in place
+      #creates: '{{ destdir }}\unzip' 
+      delete_archive: yes
+  - name: Install package
+    win_package:
+      path: "{{ msipath }}"
+      product_id: '{37CB321B-20FA-4E1C-A6E1-26CB5690B573}'
+      state: present
+      register: pkg
+  - name: check conn http 
+    win_uri:
+      url: http://<security_console>
+      method: GET
+    register: http_output
+    ignore_errors: True
+  - name: check conn https
+    win_uri:
+      url: https://<security_console>
+      method: GET
+    register: https_output
+    ignore_errors: True
+
+  - name: Remove zip
+    win_file: 
+      path: "{{ msipath }}"
+      state: absent
+      when: pkg|succeeded
+  - name: Remove zip
+    win_file: 
+      path: '{{ destdir }}\unzip'
+      state: absent
+      when: pkg|succeeded
+       
