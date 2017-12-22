@@ -1,0 +1,59 @@
+# INST0002-FIREEYE_ANSIBLE job configuration
+
+project name: INST0002-FIREEYE_ANSIBLE
+Description: Install fireeye agent package on Windows server using Ansible.
+GitLab connection: SDT GitLab
+This project is parameterized	checked
+Choice parameter:
+Name: PACKAGE
+Choices: <choose right package>
+IMAGE_HX_AGENT_WIN_25.12.1_EMEA.zip
+IMAGE_HX_AGENT_WIN_25.12.1_APAC.zip
+IMAGE_HX_AGENT_WIN_25.12.1_AMCS.zip
+Description: Select proper package per region
+
+String Parameter: 
+Name: USERNAME
+Description: signum with domain e.g esignum@company.se
+
+Password parameter:
+Name: PASSWORD
+Description: your domain password
+
+File Parameter:
+File location: INVENTORY
+Description: inventory file, remember to put "[windows]" string in the first line.
+
+Restrict where this project can be run: checked
+Label Expression: SESA_Ansible_Ops
+
+Source Code Management
+Git checked
+Repositories	
+Repository URL:	git@gitlab.company.se:operations/fireeye-installation-ansible.git
+Credentials:  sesrvac251 (zabrac mu uprawnienia do zapisu na gitlabie)
+Branches to build: 
+Branch Specifier (blank for 'any')	*/master
+Repository browser: auto
+
+Build Environment
+Delete workspace before build starts: checked
+Mask passwords and regexes (and enable global passwords): checked
+Add timestamps to the Console Output: checked
+Use secret text(s) or file(s): checked
+
+Build
+Execute shell
+command
+ set -e
+ [ -z $USERNAME ] && { echo "ERROR: No username provided."; exit 1; }
+ [ -z $PASSWORD ] && { echo "ERROR: No password provided."; exit 2; }
+ export SSHPASS="$PASSWORD"
+ echo "$PACKAGE" | grep -q zip || { echo "ERROR: No package provided"; exit 3; }
+ [ -r INVENTORY ] || { echo "ERROR: No inventory attached."; exit 4; }
+ INV=$(mktemp)
+ [ $? -ne 0 ] && { echo "$0: Can't create temp file, exiting..."; exit 5; }
+ mv INVENTORY "$INV"
+ grep -q -E "\[.*\]" "$INV" || { echo "ERROR: Invalid format of inventory."; exit 6; }
+ sshpass -e ansible-playbook install.yml -i "$INV" -f 5 -u ${USERNAME} -k -e package="$PACKAGE"
+ rm -f "$INV"
